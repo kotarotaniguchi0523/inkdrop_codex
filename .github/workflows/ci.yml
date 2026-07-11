@@ -45,9 +45,6 @@ jobs:
         with:
           go-version: "1.26.0"
           cache: false
-      - name: Install sisakulint
-        timeout-minutes: 3
-        run: go install github.com/sisaku-security/sisakulint/cmd/sisakulint@v0.2.4
       - name: Install native dependencies
         timeout-minutes: 5
         run: sudo apt-get update && sudo apt-get install --yes clang libsecret-1-dev pkg-config
@@ -81,7 +78,7 @@ jobs:
         timeout-minutes: 3
         with:
           repository: PerryTS/perry
-          ref: v0.5.1220
+          ref: 06137858dc8c6f80975238377138f2f948d6ef88 # v0.5.1220
           path: .perry-source
           persist-credentials: false
           fetch-depth: 1

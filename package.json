@@ -22,7 +22,7 @@
     "quality": "pnpm workflows:lint && pnpm biome:check && pnpm check && pnpm test && pnpm perry:check && pnpm --filter inkdrop-codex build",
     "test": "pnpm -r test",
     "verify": "pnpm check && pnpm test && pnpm build",
-    "workflows:lint": "sisakulint -ignore impostor-commit || test -z \"$(sisakulint -ignore impostor-commit 2>&1)\""
+    "workflows:lint": "sh scripts/lint-workflows.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
