@@ -1,3 +1,4 @@
+/.github/CODEOWNERS @kotarotaniguchi0523
 /.github/workflows/ @kotarotaniguchi0523
 /.github/dependabot.yml @kotarotaniguchi0523
 /packages/credential-helper/ @kotarotaniguchi0523
