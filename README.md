@@ -5,23 +5,112 @@
 
 [日本語](./README.ja.md) | English
 
-An Inkdrop 6 extension that uses a Codex subscription through
-`@earendil-works/pi-ai`.
+Inkdrop Codex is an Inkdrop 6 extension for writing and editing Markdown with your Codex
+subscription. It provides an inline assistant, rewrite presets, and next-edit predictions without
+leaving the editor.
 
-## Features
+## Features and shortcuts
 
-- Generate Markdown at the cursor or replace the current selection.
-- Rewrite text and generate Mermaid diagrams or Markdown tables from presets.
-- Show manual or automatic next-edit predictions as ghost text.
-- Accept a prediction with `Tab` or dismiss it with `Escape`.
-- Sign in through Codex browser OAuth or the device-code fallback.
-- Encrypt OAuth credentials with AES-256-GCM and store the envelope key in the OS
-  credential vault through Perry.
+Shortcuts work while the Markdown editor is focused.
 
-The extension does not store chat history or read other notes. It sends only the selected text
-and a bounded portion of the active note to Codex.
+| Feature | Shortcut | What it does |
+| --- | --- | --- |
+| Open the inline assistant | `Ctrl+Enter` | Opens an instruction popover at the cursor or selection. |
+| Request a next-edit prediction | `Alt+\` | Shows a suggested continuation as ghost text at the cursor. |
+| Accept a visible prediction | `Tab` | Inserts the ghost text into the note. Active only while a prediction is visible. |
+| Dismiss a visible prediction | `Escape` | Removes the ghost text without changing the note. |
+| Close the inline assistant | `Escape` | Closes the instruction popover without changing the note. |
+
+### Windows and Linux keymap
+
+The default Windows and Linux bindings are identical.
+
+| Feature | Windows | Linux | When available |
+| --- | --- | --- | --- |
+| Open the inline assistant | `Ctrl+Enter` | `Ctrl+Enter` | While the Markdown editor is focused |
+| Request a manual prediction | `Alt+\` | `Alt+\` | At an empty cursor when prediction mode is not disabled |
+| Accept a prediction | `Tab` | `Tab` | Only while ghost text is visible |
+| Dismiss a prediction | `Escape` | `Escape` | Only while ghost text is visible |
+| Close the inline assistant | `Escape` | `Escape` | While the instruction popover is open |
+| Open Account | No default shortcut | No default shortcut | Use **Plugins → Inkdrop Codex → Account** |
+| Automatic prediction | No shortcut required | No shortcut required | Runs after typing pauses in `automatic` mode |
+
+On a Japanese keyboard, the `\` key used by `Alt+\` may be labeled `¥`.
+
+### Write new Markdown
+
+Place the cursor where the new content should go and press `Ctrl+Enter`. Enter an instruction, then
+select **Generate**. The generated Markdown is inserted at the cursor.
+
+Examples:
+
+- Draft a release checklist.
+- Explain this section with an example.
+- Create a Mermaid sequence diagram.
+- Create a Markdown comparison table.
+
+You can also open the assistant from **Plugins → Inkdrop Codex → Edit with Codex** or the editor
+context menu.
+
+### Rewrite selected text
+
+Select text and press `Ctrl+Enter`. The generated result replaces only that selection. The popover
+provides these presets:
+
+- **Improve writing** — improve clarity and structure while preserving meaning.
+- **Make shorter** — make the selection concise without losing important information.
+- **Expand** — add useful detail and a clearer structure.
+- **Fix grammar** — fix grammar, spelling, and punctuation.
+- **Generate Mermaid** — return a fenced Mermaid diagram.
+- **Generate table** — return a concise Markdown table.
+
+Selecting a preset fills the instruction field. You can edit the instruction before selecting
+**Generate**. Press `Escape` or select **Cancel** to close the popover without modifying the note.
+
+### Use next-edit predictions
+
+Place the cursor with no text selected and press `Alt+\`. When a suggestion appears as ghost text:
+
+- Press `Tab` to insert it.
+- Press `Escape` to discard it.
+
+The prediction is also discarded if the note or cursor position changes before acceptance.
+
+Choose the prediction behavior in Inkdrop's plugin settings:
+
+- **manual** — request predictions with `Alt+\`.
+- **automatic** — request a prediction after you pause typing.
+- **disabled** — do not request predictions.
+
+### Connect your Codex account
+
+Open **Plugins → Inkdrop Codex → Account**, then select **Sign in**. The extension first attempts
+browser OAuth and provides the device-code flow when required. Use the same Account menu to check
+the connection, sign in again, or sign out.
+
+The commands `inkdrop-codex:login` and `inkdrop-codex:logout` are also available through Inkdrop's
+command system, but do not have default shortcuts.
+
+## Settings
+
+Inkdrop exposes these settings for the extension:
+
+- **Next edit prediction** — `automatic`, `manual`, or `disabled`.
+- **Codex model** — an optional model ID. Leave it empty to use the provider default.
+
+## Privacy and credential storage
+
+The extension does not store chat history or read other notes. A request contains the current
+selection and a bounded amount of nearby text from the active note.
+
+OAuth credentials are encrypted with AES-256-GCM. The encrypted envelope is stored in Inkdrop's
+user data directory, while its encryption key is stored in the operating system credential vault
+through a native Perry helper. Credential operations fail closed if the helper or credential vault
+is unavailable; there is no plaintext fallback.
 
 ## Development
+
+Enter the declared native toolchain and run the complete quality gate:
 
 ```sh
 nix develop
@@ -29,39 +118,33 @@ pnpm install
 pnpm quality
 ```
 
-`pnpm quality` runs Biome formatting and lint checks, TypeScript 7 checks, tests, Perry
-compatibility checks, and the plugin build. Apply safe formatting and lint fixes with
-`pnpm biome:fix`.
+`pnpm quality` runs workflow linting, Biome formatting and lint checks, TypeScript checks, Vitest,
+Perry compatibility checks, and the production plugin build. Apply safe formatting and lint fixes
+with `pnpm biome:fix`.
 
-Nix declares the native development toolchain, and its input revisions become reproducible once
-`flake.lock` is generated and committed. pnpm and `pnpm-lock.yaml` pin JavaScript dependencies.
-The project targets Node.js 24 and ECMAScript 2025, so the Node 24 type definitions are
-intentionally used instead of the incompatible latest major version.
-
-See [Inkdrop API and hands-on testing](./docs/inkdrop-api.md) for the APIs used by this extension
-and the procedure for loading it into Inkdrop 6.
-
-## Continuous Integration
-
-Pull requests run the full quality gate, build the native credential helper on Linux, Windows, and
-macOS, review dependency changes, and run CodeQL. A manually dispatched CI run additionally assembles
-the platform helpers and plugin bundle into a downloadable test artifact. CI does not publish to the
-Inkdrop registry or create a GitHub release.
-
-## License
-
-MIT. See [LICENSE](./LICENSE).
-
-## Native credential helper
-
-Build the Perry helper once for every supported platform and architecture:
+To build the native credential helper for the current platform:
 
 ```sh
 pnpm build:helper
 ```
 
 Copy the executable from `packages/credential-helper/dist/<platform>-<arch>/` to
-`packages/plugin/bin/<platform>-<arch>/` before packaging. There is no plaintext fallback.
+`packages/plugin/bin/<platform>-<arch>/`, then link the extension into Inkdrop:
+
+```sh
+cd packages/plugin
+ipm link --dev
+```
+
+Enable Development Mode in Inkdrop and reload it. See
+[Inkdrop API and hands-on testing](./docs/inkdrop-api.md) for the complete smoke-test procedure.
+
+## Continuous integration
+
+Pull requests run the complete quality gate, dependency review, CodeQL, and native credential-helper
+builds on Linux, Windows, and macOS. A manually dispatched CI run assembles all platform helpers and
+the plugin into a downloadable test bundle. CI does not currently publish to the Inkdrop Registry or
+create a GitHub Release.
 
 ## Commands
 
@@ -73,4 +156,6 @@ Copy the executable from `packages/credential-helper/dist/<platform>-<arch>/` to
 - `inkdrop-codex:login`
 - `inkdrop-codex:logout`
 
-The default bindings are `Ctrl-Enter` for inline editing and `Alt-\` for a manual prediction.
+## License
+
+MIT. See [LICENSE](./LICENSE).

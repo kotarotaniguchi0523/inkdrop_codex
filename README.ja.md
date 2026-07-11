@@ -5,22 +5,111 @@
 
 日本語 | [English](./README.md)
 
-Codex Subscriptionを`@earendil-works/pi-ai`経由で利用するInkdrop 6 Extensionです。
+Inkdrop Codexは、Codex Subscriptionを使ってMarkdownを作成・編集するInkdrop 6 Extensionです。
+Inkdropのエディターを離れずに、インライン編集、文章変換プリセット、次の編集内容の予測を利用できます。
 
-## 機能
+## 機能とショートカットキー
 
-- カーソル位置へのMarkdown生成と、選択範囲の置換
-- 文章の改善、Mermaid、Markdownテーブルなどのプリセット
-- 手動または自動のNext Edit PredictionとGhost Text表示
-- `Tab`による予測の確定と`Escape`による破棄
-- CodexのブラウザOAuthとDevice Codeフォールバック
-- AES-256-GCMによるOAuth認証情報の暗号化
-- Perryを利用したOS Credential Vaultへの暗号鍵保存
+ショートカットキーはMarkdownエディターにフォーカスがあるときに動作します。
 
-チャット履歴は保存せず、ほかのノートも読み取りません。Codexへ送信するのは、選択テキストと
-アクティブなノートの範囲を限定した周辺テキストだけです。
+| 機能 | ショートカットキー | 動作 |
+| --- | --- | --- |
+| インラインアシスタントを開く | `Ctrl+Enter` | カーソル位置または選択範囲に指示入力Popoverを表示します。 |
+| 次の編集内容を予測する | `Alt+\` | カーソル位置へ候補をGhost Textとして表示します。 |
+| 表示中の予測を確定する | `Tab` | Ghost Textをノートへ挿入します。予測表示中だけ有効です。 |
+| 表示中の予測を破棄する | `Escape` | ノートを変更せずGhost Textを消します。 |
+| インラインアシスタントを閉じる | `Escape` | ノートを変更せず指示入力Popoverを閉じます。 |
+
+### Windows版・Linux版キーマップ
+
+Windows版とLinux版の標準キーマップは同じです。
+
+| 機能 | Windows | Linux | 有効になる場面 |
+| --- | --- | --- | --- |
+| インラインアシスタントを開く | `Ctrl+Enter` | `Ctrl+Enter` | Markdownエディターにフォーカスがあるとき |
+| 手動で予測する | `Alt+\` | `Alt+\` | 選択範囲がなく、予測が無効化されていないとき |
+| 予測を確定する | `Tab` | `Tab` | Ghost Textが表示されているときだけ |
+| 予測を破棄する | `Escape` | `Escape` | Ghost Textが表示されているときだけ |
+| インラインアシスタントを閉じる | `Escape` | `Escape` | 指示入力Popoverが開いているとき |
+| Accountを開く | 標準割り当てなし | 標準割り当てなし | **Plugins → Inkdrop Codex → Account**を使用 |
+| 自動予測 | キー操作不要 | キー操作不要 | `automatic`モードで入力を止めた後に実行 |
+
+日本語配列キーボードでは、`Alt+\`の`\`キーが`¥`と表示されている場合があります。
+
+### Markdownを新しく書く
+
+挿入したい場所へカーソルを置いて`Ctrl+Enter`を押します。指示を入力して**Generate**を選ぶと、
+生成されたMarkdownがカーソル位置へ挿入されます。
+
+指示の例：
+
+- リリース前のチェックリストを書いて
+- この節を具体例つきで説明して
+- Mermaidのシーケンス図を作って
+- Markdownの比較表を作って
+
+**Plugins → Inkdrop Codex → Edit with Codex**またはエディターのコンテキストメニューからも
+インラインアシスタントを開けます。
+
+### 選択した文章を書き換える
+
+文章を選択して`Ctrl+Enter`を押します。生成結果は選択範囲だけを置換します。Popoverでは次の
+プリセットを利用できます。
+
+- **Improve writing** — 意味を保ったまま明確さと構成を改善します。
+- **Make shorter** — 重要な情報を残して簡潔にします。
+- **Expand** — 有用な詳細を加えて構成を整えます。
+- **Fix grammar** — 文法、スペル、句読点を修正します。
+- **Generate Mermaid** — Mermaidのコードブロックを生成します。
+- **Generate table** — 簡潔なMarkdownテーブルを生成します。
+
+プリセットを選ぶと指示欄へ内容が入ります。**Generate**を選ぶ前に指示を編集することもできます。
+`Escape`を押すか**Cancel**を選ぶと、ノートを変更せず閉じます。
+
+### Next Edit Predictionを使う
+
+テキストを選択せず、予測したい位置へカーソルを置いて`Alt+\`を押します。候補がGhost Textで
+表示されたら、次のキーで操作します。
+
+- `Tab`：候補をノートへ挿入します。
+- `Escape`：候補を破棄します。
+
+確定前にノートまたはカーソル位置が変わった場合も、その候補は破棄されます。
+
+InkdropのPlugin Settingsで予測方法を選択できます。
+
+- **manual** — `Alt+\`を押したときだけ予測します。
+- **automatic** — 入力を止めた後に自動で予測します。
+- **disabled** — 予測を行いません。
+
+### Codexアカウントを接続する
+
+**Plugins → Inkdrop Codex → Account**を開いて**Sign in**を選択します。最初にブラウザOAuthを試し、
+必要な場合はDevice Code Flowを案内します。同じAccountメニューから接続状態の確認、再ログイン、
+サインアウトができます。
+
+`inkdrop-codex:login`と`inkdrop-codex:logout`はInkdropのコマンドとしても利用できますが、標準の
+ショートカットキーは割り当てていません。
+
+## 設定
+
+InkdropのPlugin Settingsから次を設定できます。
+
+- **Next edit prediction** — `automatic`、`manual`、`disabled`から選択します。
+- **Codex model** — 任意のModel IDです。空欄の場合はProviderの標準Modelを使用します。
+
+## プライバシーと認証情報の保存
+
+チャット履歴は保存せず、ほかのノートも読み取りません。Codexへ送るのは現在の選択範囲と、
+アクティブなノート内の範囲を限定した周辺テキストです。
+
+OAuth認証情報はAES-256-GCMで暗号化します。暗号化済みEnvelopeはInkdropのUser Data Directoryへ、
+暗号鍵はPerry製のネイティブHelperを通じてOS Credential Vaultへ保存します。HelperまたはCredential
+Vaultが利用できない場合は安全側に失敗し、平文保存へフォールバックしません。
 
 ## 開発
+
+宣言済みのネイティブToolchainへ入り、全品質ゲートを実行します。
 
 ```sh
 nix develop
@@ -28,37 +117,32 @@ pnpm install
 pnpm quality
 ```
 
-`pnpm quality`ひとつでBiomeのFormat・Lint検査、TypeScript 7の型検査、テスト、
-Perry互換性検査、Extensionのビルドを実行します。安全な自動修正は`pnpm biome:fix`で実行できます。
+`pnpm quality`はWorkflow Lint、BiomeのFormat・Lint検査、TypeScriptの型検査、Vitest、Perry互換性検査、
+本番用Extension Buildを実行します。安全なFormat・Lintの自動修正は`pnpm biome:fix`で実行できます。
 
-NixはNode.js、pnpm、clang、LLVM、libsecretなどのネイティブ開発環境を宣言します。
-Nix入力のリビジョンは`flake.lock`を生成してコミットした時点で再現可能になります。
-JavaScriptライブラリはpnpmと`pnpm-lock.yaml`で固定します。対象はNode.js 24とECMAScript 2025です。
-そのため、互換性のない最新メジャーではなくNode 24系の最新型定義を使用しています。
-
-使用するAPIとInkdrop 6での実地テスト手順は、
-[Inkdrop APIと実地テスト](./docs/inkdrop-api.md)を参照してください。
-
-## Continuous Integration
-
-Pull Requestでは全品質ゲート、Linux・Windows・macOSのCredential Helperビルド、依存関係レビュー、
-CodeQLを実行します。CIを手動実行した場合だけ、各OSのHelperとPlugin bundleをまとめた検証用Artifactを
-生成します。Inkdrop Registryへの公開やGitHub Releaseの作成は行いません。
-
-## ライセンス
-
-MITです。詳細は[LICENSE](./LICENSE)を参照してください。
-
-## Perry Credential Helper
-
-対応するOSとアーキテクチャごとにネイティブヘルパーをビルドします。
+現在のPlatform向けCredential Helperは次のコマンドでビルドします。
 
 ```sh
 pnpm build:helper
 ```
 
-配布前に`packages/credential-helper/dist/<platform>-<arch>/`の実行ファイルを
-`packages/plugin/bin/<platform>-<arch>/`へ配置します。平文保存へのフォールバックはありません。
+`packages/credential-helper/dist/<platform>-<arch>/`の実行ファイルを
+`packages/plugin/bin/<platform>-<arch>/`へ配置してから、ExtensionをInkdropへリンクします。
+
+```sh
+cd packages/plugin
+ipm link --dev
+```
+
+InkdropでDevelopment Modeを有効にして再読み込みします。詳しいSmoke Testは
+[Inkdrop APIと実地テスト](./docs/inkdrop-api.md)を参照してください。
+
+## Continuous Integration
+
+Pull Requestでは全品質ゲート、依存関係レビュー、CodeQL、Linux・Windows・macOS向けのネイティブ
+Credential Helper Buildを実行します。CIを手動実行すると、全PlatformのHelperとExtensionをまとめた
+検証用BundleをArtifactとして生成します。現在のCIはInkdrop Registryへの公開やGitHub Releaseの作成を
+行いません。
 
 ## コマンド
 
@@ -70,4 +154,6 @@ pnpm build:helper
 - `inkdrop-codex:login`
 - `inkdrop-codex:logout`
 
-標準キーバインドはInline Editが`Ctrl-Enter`、手動予測が`Alt-\`です。
+## ライセンス
+
+MITです。詳細は[LICENSE](./LICENSE)を参照してください。
