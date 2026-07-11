@@ -1,5 +1,8 @@
 # Inkdrop Codex
 
+[![CI](https://github.com/kotarotaniguchi0523/inkdrop_codex/actions/workflows/ci.yml/badge.svg)](https://github.com/kotarotaniguchi0523/inkdrop_codex/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/kotarotaniguchi0523/inkdrop_codex/actions/workflows/codeql.yml/badge.svg)](https://github.com/kotarotaniguchi0523/inkdrop_codex/actions/workflows/codeql.yml)
+
 [日本語](./README.ja.md) | English
 
 An Inkdrop 6 extension that uses a Codex subscription through
@@ -37,6 +40,17 @@ intentionally used instead of the incompatible latest major version.
 
 See [Inkdrop API and hands-on testing](./docs/inkdrop-api.md) for the APIs used by this extension
 and the procedure for loading it into Inkdrop 6.
+
+## Continuous Integration
+
+Pull requests run the full quality gate, build the native credential helper on Linux, Windows, and
+macOS, review dependency changes, and run CodeQL. A manually dispatched CI run additionally assembles
+the platform helpers and plugin bundle into a downloadable test artifact. CI does not publish to the
+Inkdrop registry or create a GitHub release.
+
+## License
+
+MIT. See [LICENSE](./LICENSE).
 
 ## Native credential helper
 

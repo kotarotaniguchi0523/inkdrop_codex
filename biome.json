@@ -4,6 +4,7 @@
     "includes": [
       "**",
       "!!**/node_modules",
+      "!!artifacts",
       "!!packages/credential-contract/dist",
       "!!packages/plugin/lib",
       "!!packages/credential-helper/dist"

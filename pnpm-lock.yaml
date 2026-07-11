@@ -39,9 +39,6 @@ importers:
       '@inkdrop-codex/credential-contract':
         specifier: workspace:*
         version: link:../credential-contract
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
     devDependencies:
       '@perryts/perry':
         specifier: ^0.5.1220

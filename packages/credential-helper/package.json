@@ -13,7 +13,6 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "@inkdrop-codex/credential-contract": "workspace:*",
-    "zod": "^4.4.3"
+    "@inkdrop-codex/credential-contract": "workspace:*"
   }
 }

@@ -2,6 +2,11 @@
   "name": "inkdrop-codex-workspace",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kotarotaniguchi0523/inkdrop_codex.git"
+  },
   "packageManager": "pnpm@10.14.0",
   "engines": {
     "node": ">=24.0.0"
@@ -13,6 +18,7 @@
     "biome:fix": "biome check --write .",
     "check": "pnpm -r check",
     "perry:check": "pnpm --filter @inkdrop-codex/credential-contract build && pnpm --filter @inkdrop-codex/credential-helper exec perry check --check-deps --deep-deps --strict src/main.ts",
+    "package:candidate": "pnpm --filter inkdrop-codex package:candidate",
     "quality": "pnpm biome:check && pnpm check && pnpm test && pnpm perry:check && pnpm --filter inkdrop-codex build",
     "test": "pnpm -r test",
     "verify": "pnpm check && pnpm test && pnpm build"

@@ -2,9 +2,9 @@ node_modules/
 lib/
 dist/
 coverage/
+artifacts/
 .pnpm-store/
 .direnv/
 result
 packages/plugin/bin/
 *.log
-

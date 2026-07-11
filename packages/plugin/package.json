@@ -3,6 +3,18 @@
   "version": "0.1.0",
   "description": "Codex-powered inline editing and next edit predictions for Inkdrop",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kotarotaniguchi0523/inkdrop_codex.git",
+    "directory": "packages/plugin"
+  },
+  "keywords": [
+    "inkdrop",
+    "codex",
+    "ai",
+    "markdown"
+  ],
   "main": "./lib/index.cjs",
   "type": "module",
   "engines": {
@@ -37,6 +49,7 @@
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "check": "tsc --noEmit",
+    "package:candidate": "node ./scripts/package-candidate.mjs",
     "test": "vitest run"
   },
   "dependencies": {
