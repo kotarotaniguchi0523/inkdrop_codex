@@ -45,7 +45,9 @@ jobs:
   helper:
     name: Helper (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    timeout-minutes: 45
+    env:
+      PERRY_WORKSPACE_ROOT: ${{ github.workspace }}/.perry-source
     strategy:
       fail-fast: false
       matrix:
@@ -53,6 +55,16 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+      # Perry 0.5.1220's bundled full stdlib has unresolved optional HTTP symbols.
+      # The matching source lets Perry rebuild only the helper's reachable features.
+      - name: Check out pinned Perry sources
+        uses: actions/checkout@v6
+        with:
+          repository: PerryTS/perry
+          ref: v0.5.1220
+          path: .perry-source
+          persist-credentials: false
+          fetch-depth: 1
       - name: Install pnpm
         uses: pnpm/action-setup@v6
         with:
