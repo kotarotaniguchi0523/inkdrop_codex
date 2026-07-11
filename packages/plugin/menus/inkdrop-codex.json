@@ -1,0 +1,19 @@
+{
+  "menu": [
+    {
+      "label": "Plugins",
+      "submenu": [
+        {
+          "label": "Inkdrop Codex",
+          "submenu": [
+            { "label": "Edit with Codex", "command": "inkdrop-codex:edit" },
+            { "label": "Account", "command": "inkdrop-codex:open-account" }
+          ]
+        }
+      ]
+    }
+  ],
+  "context-menu": {
+    ".cm-editor": [{ "label": "Edit with Codex", "command": "inkdrop-codex:edit" }]
+  }
+}

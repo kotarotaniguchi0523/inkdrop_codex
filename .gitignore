@@ -1,0 +1,10 @@
+node_modules/
+lib/
+dist/
+coverage/
+.pnpm-store/
+.direnv/
+result
+packages/plugin/bin/
+*.log
+

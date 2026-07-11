@@ -1,0 +1,10 @@
+{
+  ".cm-editor .cm-content": {
+    "ctrl-enter": "inkdrop-codex:edit",
+    "alt-\\": "inkdrop-codex:trigger-next-edit"
+  },
+  ".cm-editor.inkdrop-codex-nes-active .cm-content": {
+    "escape": "inkdrop-codex:dismiss-next-edit",
+    "tab": "inkdrop-codex:accept-next-edit"
+  }
+}

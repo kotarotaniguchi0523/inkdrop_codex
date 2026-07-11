@@ -1,0 +1,129 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!!**/node_modules",
+      "!!packages/credential-contract/dist",
+      "!!packages/plugin/lib",
+      "!!packages/credential-helper/dist"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": false
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "all",
+      "correctness": {
+        "noGlobalDirnameFilename": "off",
+        "noNodejsModules": "off",
+        "noProcessGlobal": "off",
+        "noUnresolvedImports": "off",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "useImportExtensions": "off",
+        "useQwikValidLexicalScope": "off"
+      },
+      "performance": {
+        "noBarrelFile": "off",
+        "noReExportAll": "off"
+      },
+      "style": {
+        "noDefaultExport": "off",
+        "noMagicNumbers": "off",
+        "noTernary": "off",
+        "useBlockStatements": "error",
+        "useDefaultSwitchClause": "off",
+        "useExportsLast": "off",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "requireAscii": true,
+            "strictCase": false
+          }
+        }
+      },
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noUnnecessaryConditions": "off"
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["packages/credential-helper/src/main.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          },
+          "correctness": {
+            "noUndeclaredDependencies": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/test/**"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noSecrets": "off"
+          },
+          "complexity": {
+            "noExcessiveLinesPerFunction": "off"
+          },
+          "style": {
+            "noExcessiveClassesPerFile": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/plugin/src/editor/prediction-controller.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noExcessiveClassesPerFile": "off"
+          }
+        }
+      }
+    }
+  ]
+}

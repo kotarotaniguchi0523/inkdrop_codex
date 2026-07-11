@@ -1,0 +1,19 @@
+{
+  "name": "@inkdrop-codex/credential-helper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@perryts/perry": "^0.5.1220",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@inkdrop-codex/credential-contract": "workspace:*",
+    "zod": "^4.4.3"
+  }
+}

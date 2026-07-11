@@ -1,0 +1,88 @@
+@layer inkdrop-codex {
+  .inkdrop-codex-popover {
+    position: fixed;
+    z-index: 1100;
+    width: min(380px, calc(100vw - 24px));
+    padding: 10px;
+    background: var(--background-color, rgb(32 33 36));
+    border: 1px solid var(--border-color, rgb(74 74 74));
+    border-radius: 6px;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 28%);
+  }
+
+  .inkdrop-codex-popover textarea,
+  .inkdrop-codex-dialog input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px;
+    color: inherit;
+    background: var(--input-background, rgb(0 0 0 / 16%));
+    border: 1px solid var(--border-color, rgb(85 85 85));
+    border-radius: 4px;
+    resize: vertical;
+  }
+
+  .inkdrop-codex-preset-list,
+  .inkdrop-codex-options,
+  .inkdrop-codex-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .inkdrop-codex-preset-list {
+    margin-bottom: 8px;
+  }
+  .inkdrop-codex-actions {
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  .inkdrop-codex-popover button,
+  .inkdrop-codex-dialog button {
+    min-height: 30px;
+    padding: 5px 9px;
+    color: inherit;
+    background: var(--button-background, rgb(255 255 255 / 8%));
+    border: 1px solid var(--border-color, rgb(85 85 85));
+    border-radius: 4px;
+  }
+
+  .inkdrop-codex-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    background: rgb(0 0 0 / 42%);
+  }
+
+  .inkdrop-codex-dialog {
+    width: min(420px, calc(100vw - 32px));
+    padding: 18px;
+    color: var(--text-color, rgb(238 238 238));
+    background: var(--background-color, rgb(32 33 36));
+    border: 1px solid var(--border-color, rgb(74 74 74));
+    border-radius: 6px;
+    box-shadow: 0 16px 44px rgb(0 0 0 / 34%);
+  }
+
+  .inkdrop-codex-dialog h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    letter-spacing: 0;
+  }
+  .inkdrop-codex-dialog p {
+    margin: 0 0 14px;
+    line-height: 1.5;
+  }
+  .inkdrop-codex-options {
+    flex-direction: column;
+  }
+  .inkdrop-codex-ghost {
+    color: var(--text-color-muted, rgb(136 136 136));
+    opacity: 0.72;
+    pointer-events: none;
+    white-space: pre-wrap;
+  }
+}

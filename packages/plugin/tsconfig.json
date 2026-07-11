@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "paths": {
+      "inkdrop": ["./node_modules/@inkdropapp/types/src/inkdrop-module/index.d.ts"]
+    },
+    "types": ["node", "@inkdropapp/types"]
+  },
+  "include": ["src", "test"]
+}
