@@ -143,8 +143,10 @@ Enable Development Mode in Inkdrop and reload it. See
 
 Pull requests run the complete quality gate, dependency review, CodeQL, and native credential-helper
 builds on Linux, Windows, and macOS. A manually dispatched CI run assembles all platform helpers and
-the plugin into a downloadable test bundle. CI does not currently publish to the Inkdrop Registry or
-create a GitHub Release.
+the plugin into a downloadable test bundle. An immutable `v*` tag runs the same build, waits for
+approval through the `inkdrop-production` environment, attests the release provenance, and creates a
+GitHub Release with archives and SHA-256 checksums. Publishing to the Inkdrop Registry remains a
+separate manual step after platform smoke testing.
 
 ## Commands
 

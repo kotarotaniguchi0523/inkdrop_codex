@@ -141,8 +141,9 @@ InkdropでDevelopment Modeを有効にして再読み込みします。詳しい
 
 Pull Requestでは全品質ゲート、依存関係レビュー、CodeQL、Linux・Windows・macOS向けのネイティブ
 Credential Helper Buildを実行します。CIを手動実行すると、全PlatformのHelperとExtensionをまとめた
-検証用BundleをArtifactとして生成します。現在のCIはInkdrop Registryへの公開やGitHub Releaseの作成を
-行いません。
+検証用BundleをArtifactとして生成します。変更不能な`v*` Tagを作成すると同じBuildを実行し、
+`inkdrop-production` Environmentでの承認後にProvenanceを証明して、ArchiveとSHA-256 Checksumを含む
+GitHub Releaseを作成します。Inkdrop Registryへの公開は、各PlatformのSmoke Test後に行う別の手動工程です。
 
 ## コマンド
 

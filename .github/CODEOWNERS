@@ -1,0 +1,8 @@
+/.github/CODEOWNERS @kotarotaniguchi0523
+/.github/workflows/ @kotarotaniguchi0523
+/.github/dependabot.yml @kotarotaniguchi0523
+/packages/credential-helper/ @kotarotaniguchi0523
+/packages/plugin/scripts/package-candidate.mjs @kotarotaniguchi0523
+/pnpm-lock.yaml @kotarotaniguchi0523
+/pnpm-workspace.yaml @kotarotaniguchi0523
+/flake.nix @kotarotaniguchi0523
