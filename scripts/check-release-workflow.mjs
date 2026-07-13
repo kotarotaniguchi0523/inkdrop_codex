@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 
-const ci = await readFile(".github/workflows/ci.yml", "utf8");
-const release = await readFile(".github/workflows/release.yml", "utf8");
+const normalizeLineEndings = (source) => source.replaceAll("\r\n", "\n");
+const ci = normalizeLineEndings(await readFile(".github/workflows/ci.yml", "utf8"));
+const release = normalizeLineEndings(await readFile(".github/workflows/release.yml", "utf8"));
 const releaseConcurrencyPolicy = [
   "group: release-",
   "$",
