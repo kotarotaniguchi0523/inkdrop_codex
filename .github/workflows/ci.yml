@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 permissions:
@@ -17,6 +15,40 @@ env:
   PNPM_VERSION: 10.14.0
 
 jobs:
+  changes:
+    name: Classify changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      helper: ${{ steps.filter.outputs.helper }}
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        timeout-minutes: 2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Detect native helper changes
+        id: filter
+        timeout-minutes: 1
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- \
+            .github/workflows/ \
+            flake.lock \
+            flake.nix \
+            package.json \
+            packages/credential-contract/ \
+            packages/credential-helper/ \
+            pnpm-lock.yaml \
+            pnpm-workspace.yaml; then
+            echo "helper=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "helper=true" >> "$GITHUB_OUTPUT"
+          fi
+
   quality:
     name: Quality gate
     runs-on: ubuntu-latest
@@ -38,6 +70,8 @@ jobs:
         timeout-minutes: 2
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install Go for workflow linting
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         timeout-minutes: 2
@@ -55,16 +89,23 @@ jobs:
         run: pnpm quality
   helper:
     name: Helper (${{ matrix.os }})
+    needs: changes
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     env:
       PERRY_WORKSPACE_ROOT: ${{ github.workspace }}/.perry-source
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+      - name: Native helper build not required
+        if: needs.changes.outputs.helper != 'true'
+        timeout-minutes: 1
+        run: echo "No native helper inputs changed."
       - name: Check out repository
+        if: needs.changes.outputs.helper == 'true'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         timeout-minutes: 2
         with:
@@ -72,6 +113,7 @@ jobs:
       # Perry 0.5.1220's bundled full stdlib has unresolved optional HTTP symbols.
       # The matching source lets Perry rebuild only the helper's reachable features.
       - name: Check out pinned Perry sources
+        if: needs.changes.outputs.helper == 'true'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         timeout-minutes: 3
         with:
@@ -81,27 +123,34 @@ jobs:
           persist-credentials: false
           fetch-depth: 1
       - name: Install pnpm
+        if: needs.changes.outputs.helper == 'true'
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
         timeout-minutes: 2
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
       - name: Install Node.js
+        if: needs.changes.outputs.helper == 'true'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         timeout-minutes: 2
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install Linux native dependencies
-        if: runner.os == 'Linux'
+        if: needs.changes.outputs.helper == 'true' && runner.os == 'Linux'
         timeout-minutes: 5
         run: sudo apt-get update && sudo apt-get install --yes clang libsecret-1-dev pkg-config
       - name: Install dependencies
+        if: needs.changes.outputs.helper == 'true'
         timeout-minutes: 5
         run: pnpm install --frozen-lockfile
       - name: Build native credential helper
+        if: needs.changes.outputs.helper == 'true'
         timeout-minutes: 30
         run: pnpm build:helper
       - name: Upload credential helper
+        if: needs.changes.outputs.helper == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         timeout-minutes: 3
         with:
