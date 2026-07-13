@@ -17,25 +17,22 @@ env:
 jobs:
   changes:
     name: Classify changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     outputs:
       helper: ${{ steps.filter.outputs.helper }}
     steps:
       - name: Check out repository history
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         timeout-minutes: 2
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 2
       - name: Detect native helper changes
         id: filter
         timeout-minutes: 1
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- \
+          if git diff --quiet HEAD^1 HEAD -- \
             .github/workflows/ \
             flake.lock \
             flake.nix \
@@ -150,12 +147,3 @@ jobs:
         if: needs.changes.outputs.helper == 'true'
         timeout-minutes: 30
         run: pnpm build:helper
-      - name: Upload credential helper
-        if: needs.changes.outputs.helper == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        timeout-minutes: 3
-        with:
-          name: credential-helper-${{ runner.os }}-${{ runner.arch }}
-          path: packages/credential-helper/dist/
-          if-no-files-found: error
-          retention-days: 14

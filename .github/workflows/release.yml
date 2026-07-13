@@ -139,6 +139,7 @@ jobs:
           name: credential-helper-${{ runner.os }}-${{ runner.arch }}
           path: packages/credential-helper/dist/
           if-no-files-found: error
+          compression-level: 0
           retention-days: 14
 
   bundle:
@@ -218,6 +219,7 @@ jobs:
             artifacts/inkdrop-codex-*.zip
             artifacts/checksums.txt
           if-no-files-found: error
+          compression-level: 0
           retention-days: 14
 
   release:
