@@ -77,21 +77,12 @@ jobs:
         timeout-minutes: 2
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Install Go for workflow linting
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
-        timeout-minutes: 2
-        with:
-          go-version: "1.26.0"
-          cache: false
-      - name: Install native dependencies
-        timeout-minutes: 5
-        run: sudo apt-get update && sudo apt-get install --yes clang libsecret-1-dev pkg-config
       - name: Install dependencies
         timeout-minutes: 5
         run: pnpm install --frozen-lockfile
       - name: Run repository quality gate
         timeout-minutes: 10
-        run: pnpm quality
+        run: pnpm quality:ci
 
   helper:
     name: Release helper (${{ matrix.os }})
