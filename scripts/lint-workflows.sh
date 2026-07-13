@@ -16,3 +16,5 @@ fi
 
 "$sisakulint" -ignore impostor-commit ||
   test -z "$("$sisakulint" -ignore impostor-commit 2>&1)"
+
+node scripts/check-release-workflow.mjs

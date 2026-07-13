@@ -3,9 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
-    tags: ["v*"]
   pull_request:
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -55,11 +53,6 @@ jobs:
       - name: Run repository quality gate
         timeout-minutes: 10
         run: pnpm quality
-      - name: Verify release version
-        if: startsWith(github.ref, 'refs/tags/v')
-        timeout-minutes: 1
-        run: test "$GITHUB_REF_NAME" = "v$(node -p "require('./packages/plugin/package.json').version")"
-
   helper:
     name: Helper (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -116,114 +109,3 @@ jobs:
           path: packages/credential-helper/dist/
           if-no-files-found: error
           retention-days: 14
-
-  candidate:
-    name: Assemble manual test bundle
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
-    needs: [quality, helper]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        timeout-minutes: 2
-        with:
-          persist-credentials: false
-      - name: Install pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
-        timeout-minutes: 2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-      - name: Install Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        timeout-minutes: 2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install dependencies
-        timeout-minutes: 5
-        run: pnpm install --frozen-lockfile
-      - name: Download all native helpers
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
-        timeout-minutes: 3
-        with:
-          pattern: credential-helper-*
-          path: ${{ runner.temp }}/credential-helpers
-          merge-multiple: true
-      - name: Stage validated native helpers
-        timeout-minutes: 2
-        env:
-          HELPER_SOURCE: ${{ runner.temp }}/credential-helpers
-        run: |
-          test "$(find "$HELPER_SOURCE" -type f \( -name credential-helper -o -name credential-helper.exe \) | wc -l)" -eq 3
-          mkdir -p packages/plugin/bin
-          cp -R "$HELPER_SOURCE"/. packages/plugin/bin/
-      - name: Restore Unix executable permissions
-        timeout-minutes: 2
-        run: find packages/plugin/bin -type f -name credential-helper -exec chmod 755 {} +
-      - name: Build plugin bundle
-        timeout-minutes: 5
-        run: pnpm --filter inkdrop-codex build
-      - name: Prepare standalone Inkdrop package
-        timeout-minutes: 3
-        run: pnpm package:candidate
-      - name: Create archives and checksums
-        timeout-minutes: 3
-        run: |
-          version=$(node -p "require('./packages/plugin/package.json').version")
-          tar -C artifacts -czf "artifacts/inkdrop-codex-${version}.tar.gz" inkdrop-codex
-          cd artifacts
-          zip -rq "inkdrop-codex-${version}.zip" inkdrop-codex
-          sha256sum "inkdrop-codex-${version}.tar.gz" "inkdrop-codex-${version}.zip" > checksums.txt
-      - name: Upload test bundle
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        timeout-minutes: 3
-        with:
-          name: inkdrop-codex-test-bundle
-          path: |
-            artifacts/inkdrop-codex-*.tar.gz
-            artifacts/inkdrop-codex-*.zip
-            artifacts/checksums.txt
-          if-no-files-found: error
-          retention-days: 14
-
-  release:
-    name: Publish GitHub release
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: candidate
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    environment: inkdrop-production
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
-    steps:
-      - name: Download release bundle
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
-        timeout-minutes: 3
-        with:
-          name: inkdrop-codex-test-bundle
-          path: release
-      - name: Verify release checksums
-        timeout-minutes: 1
-        working-directory: release
-        run: sha256sum --check checksums.txt
-      - name: Attest release provenance
-        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
-        timeout-minutes: 3
-        with:
-          subject-path: release/inkdrop-codex-*.*
-      - name: Publish immutable GitHub release
-        timeout-minutes: 3
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create "$GITHUB_REF_NAME"
-          release/inkdrop-codex-*.tar.gz
-          release/inkdrop-codex-*.zip
-          release/checksums.txt
-          --repo "$GITHUB_REPOSITORY"
-          --verify-tag
-          --generate-notes
-          --title "$GITHUB_REF_NAME"
