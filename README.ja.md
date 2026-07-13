@@ -140,10 +140,12 @@ InkdropでDevelopment Modeを有効にして再読み込みします。詳しい
 ## Continuous Integration
 
 Pull Requestでは全品質ゲート、依存関係レビュー、CodeQL、Linux・Windows・macOS向けのネイティブ
-Credential Helper Buildを実行します。CIを手動実行すると、全PlatformのHelperとExtensionをまとめた
-検証用BundleをArtifactとして生成します。変更不能な`v*` Tagを作成すると同じBuildを実行し、
-`inkdrop-production` Environmentでの承認後にProvenanceを証明して、ArchiveとSHA-256 Checksumを含む
-GitHub Releaseを作成します。Inkdrop Registryへの公開は、各PlatformのSmoke Test後に行う別の手動工程です。
+Credential Helper Buildを実行しますが、Release Archiveは生成しません。`main`から**Release** Workflowを
+手動実行すると、`inkdrop-codex-release-bundle`を一度だけBuildし、保護された`inkdrop-production`
+Environmentで停止します。そのArtifactをDownloadして各PlatformのSmoke Testを完了してから承認します。
+承認後は再Buildせず、確認した同一ArchiveへProvenanceを付与して公開し、公開時にだけVersion Tagを
+作成します。失敗時はDeploymentを拒否します。Inkdrop Registryへの公開は、GitHub Release検証後に行う
+別の手動工程です。
 
 ## コマンド
 

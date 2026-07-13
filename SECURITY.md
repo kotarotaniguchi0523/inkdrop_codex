@@ -3,8 +3,9 @@
 ## Supported Versions
 
 This project is pre-release. Security fixes are applied to the latest commit on `main` only. After
-the first release, security fixes will be provided for the latest released version. Pre-release test
-bundles are supported only while their corresponding GitHub Actions artifacts remain available.
+the first release, security fixes will be provided for the latest released version. Unpublished
+release bundles are supported only while their corresponding GitHub Actions artifacts remain
+available.
 
 ## Reporting a Vulnerability
 
@@ -28,5 +29,8 @@ unsafely.
 
 ## Release Integrity
 
-Official releases are created from immutable `v*` tags by GitHub Actions. Verify the published
-SHA-256 checksums and GitHub artifact attestation before installing a release bundle.
+Official releases use the exact archive that passed manual platform testing. The owner manually
+starts the release workflow from `main`; the workflow builds once and then waits behind the protected
+`inkdrop-production` environment. Approval attaches provenance and publishes the already-tested
+archive without rebuilding it, creating the immutable `v*` tag at publication time. Verify the
+published SHA-256 checksums and GitHub artifact attestation before installing a release bundle.
