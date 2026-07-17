@@ -19,6 +19,7 @@
     "check": "pnpm -r check",
     "perry:check": "pnpm --filter @inkdrop-codex/credential-contract build && pnpm --filter @inkdrop-codex/credential-helper exec perry check --check-deps --deep-deps --strict src/main.ts",
     "package:release": "pnpm --filter inkdrop-codex package:release",
+    "quality:ci": "pnpm biome:check && pnpm check && pnpm test && pnpm perry:check && pnpm --filter inkdrop-codex build",
     "quality": "pnpm workflows:lint && pnpm biome:check && pnpm check && pnpm test && pnpm perry:check && pnpm --filter inkdrop-codex build",
     "test": "pnpm -r test",
     "verify": "pnpm check && pnpm test && pnpm build",
