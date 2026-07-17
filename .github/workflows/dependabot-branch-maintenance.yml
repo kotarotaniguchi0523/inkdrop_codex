@@ -1,8 +1,10 @@
 name: Dependabot branch maintenance
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 * * * *"
 
 permissions:
   contents: write
@@ -11,21 +13,23 @@ permissions:
 jobs:
   rebase:
     name: Rebase Dependabot branch
-    if: >-
-      github.repository == 'kotarotaniguchi0523/inkdrop_codex' &&
-      github.event.pull_request.user.login == 'dependabot[bot]' &&
-      github.event.pull_request.base.ref == 'main'
+    if: github.repository == 'kotarotaniguchi0523/inkdrop_codex'
     runs-on: ubuntu-slim
     timeout-minutes: 5
     steps:
       - name: Update branch when behind main
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          state=$(gh pr view "$PR_NUMBER" --json mergeStateStatus --jq .mergeStateStatus)
-          if [ "$state" = "BEHIND" ] || [ "$state" = "BLOCKED" ]; then
-            gh pr update-branch "$PR_NUMBER" --rebase
-          else
-            echo "No branch update required (merge state: $state)."
-          fi
+          gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --author 'dependabot[bot]' \
+            --base main \
+            --json number,mergeStateStatus \
+            --jq '.[] | select(.mergeStateStatus == "BEHIND" or .mergeStateStatus == "BLOCKED") | .number' |
+          while read -r pr_number; do
+            [ -n "$pr_number" ] || continue
+            echo "Rebasing Dependabot PR #$pr_number"
+            gh pr update-branch "$pr_number" --rebase --repo "$GITHUB_REPOSITORY"
+          done
