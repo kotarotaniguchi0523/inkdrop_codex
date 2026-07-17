@@ -141,14 +141,19 @@ Enable Development Mode in Inkdrop and reload it. See
 
 ## Continuous integration
 
-Pull requests run the complete quality gate, dependency review, CodeQL, and native credential-helper
-builds on Linux, Windows, and macOS without producing a release archive. Manually running the
-**Release** workflow from `main` builds one `inkdrop-codex-release-bundle` and then pauses at the
+Pull requests run the complete quality gate, dependency review, CodeQL, and native
+credential-helper builds for x64 and ARM64 on Linux, Windows, and macOS without producing a release
+archive. Manually running the **Release** workflow from `main` builds one
+`inkdrop-codex-release-bundle` and then pauses at the
 protected `inkdrop-production` environment. Download that artifact and complete the platform smoke
 tests before approving the environment. Approval attests and publishes those exact archives without
 rebuilding them, creating the version tag only at publication time. Reject the deployment if any
 test fails. Publishing to the Inkdrop Registry remains a separate manual step after the GitHub
 Release has been verified.
+
+Perry does not publish a Windows ARM64 compiler. The workflow therefore builds the x64 helper on a
+Windows x64 runner, transfers that exact artifact to a Windows 11 ARM runner, and verifies that it
+starts under x64 emulation before packaging it in `bin/win32-arm64`.
 
 ## Commands
 

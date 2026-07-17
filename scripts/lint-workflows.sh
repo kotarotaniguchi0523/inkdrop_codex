@@ -21,17 +21,21 @@ lint() {
 set --
 for workflow in .github/workflows/*.yml .github/workflows/*.yaml; do
   [ -f "$workflow" ] || continue
-  [ "$workflow" = ".github/workflows/ci.yml" ] || set -- "$@" "$workflow"
+  case "$workflow" in
+    .github/workflows/ci.yml | .github/workflows/release.yml) ;;
+    *) set -- "$@" "$workflow" ;;
+  esac
 done
 
 lint -ignore impostor-commit "$@"
 
 # GitHub Actions supports parallel steps, but Sisakulint v0.3.4's schema does not.
-# Defer ci.yml syntax validation to GitHub while keeping Sisakulint's security rules enabled.
+# Defer workflows using it to GitHub while keeping Sisakulint's security rules enabled.
 # Syntax validation stays strict for every other workflow.
 lint \
   -ignore impostor-commit \
   -ignore syntax \
-  .github/workflows/ci.yml
+  .github/workflows/ci.yml \
+  .github/workflows/release.yml
 
 node scripts/check-release-workflow.mjs

@@ -79,14 +79,18 @@ jobs:
           - name: Run TypeScript checks
             timeout-minutes: 5
             run: pnpm check
-      - name: Run test, compatibility, and build checks
-        timeout-minutes: 10
-        run: >-
-          pnpm test &&
-          pnpm perry:check &&
-          pnpm --filter inkdrop-codex build
+      - parallel:
+          - name: Run tests
+            timeout-minutes: 10
+            run: pnpm test
+          - name: Run Perry compatibility checks
+            timeout-minutes: 10
+            run: pnpm perry:check
+          - name: Build plugin
+            timeout-minutes: 5
+            run: pnpm --filter inkdrop-codex build
   helper:
-    name: Helper (${{ matrix.os }})
+    name: Helper (${{ matrix.platform }}-${{ matrix.arch }})
     needs: changes
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
@@ -94,9 +98,29 @@ jobs:
       PERRY_WORKSPACE_ROOT: ${{ github.workspace }}/.perry-source
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 6
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            node_arch: x64
+          - os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+            node_arch: arm64
+          - os: windows-latest
+            platform: win32
+            arch: x64
+            node_arch: x64
+          - os: macos-15-intel
+            platform: darwin
+            arch: x64
+            node_arch: x64
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            node_arch: arm64
     steps:
       - name: Native helper build not required
         if: needs.changes.outputs.helper != 'true'
@@ -126,9 +150,9 @@ jobs:
         timeout-minutes: 5
         with:
           path: .perry-source/target
-          key: perry-target-${{ runner.os }}-${{ runner.arch }}-06137858-${{ github.sha }}
+          key: perry-target-${{ matrix.platform }}-${{ matrix.arch }}-06137858-${{ github.sha }}
           restore-keys: |
-            perry-target-${{ runner.os }}-${{ runner.arch }}-06137858-
+            perry-target-${{ matrix.platform }}-${{ matrix.arch }}-06137858-
       - name: Install pnpm
         if: needs.changes.outputs.helper == 'true'
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
@@ -142,6 +166,7 @@ jobs:
         timeout-minutes: 2
         with:
           node-version: ${{ env.NODE_VERSION }}
+          architecture: ${{ matrix.node_arch }}
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - name: Install Linux native dependencies
@@ -156,3 +181,48 @@ jobs:
         if: needs.changes.outputs.helper == 'true'
         timeout-minutes: 30
         run: pnpm build:helper
+      - name: Upload Windows x64 helper for ARM compatibility test
+        if: >-
+          needs.changes.outputs.helper == 'true' &&
+          matrix.platform == 'win32' &&
+          matrix.arch == 'x64'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        timeout-minutes: 3
+        with:
+          name: ci-credential-helper-win32-x64
+          path: packages/credential-helper/dist/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  windows-arm-compatibility:
+    name: Helper (win32-arm64 compatibility)
+    needs: [changes, helper]
+    runs-on: windows-11-arm
+    timeout-minutes: 10
+    steps:
+      - name: Native helper validation not required
+        if: needs.changes.outputs.helper != 'true'
+        timeout-minutes: 1
+        run: echo "No native helper inputs changed."
+      - name: Download Windows x64 helper
+        if: needs.changes.outputs.helper == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        timeout-minutes: 3
+        with:
+          name: ci-credential-helper-win32-x64
+          path: ${{ runner.temp }}/credential-helper
+      - name: Verify x64 helper on Windows ARM64
+        if: needs.changes.outputs.helper == 'true'
+        timeout-minutes: 2
+        shell: pwsh
+        run: |
+          $helper = "${{ runner.temp }}/credential-helper/win32-x64/credential-helper.exe"
+          if (-not (Test-Path $helper)) {
+            throw "The Windows x64 helper artifact is missing"
+          }
+          $response = '{}' | & $helper
+          if ($response -notmatch '"kind":"Failure"') {
+            throw "The x64 compatibility helper did not execute on Windows ARM64"
+          }
+          $global:LASTEXITCODE = 0
