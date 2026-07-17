@@ -148,8 +148,8 @@ Environmentで停止します。そのArtifactをDownloadして各PlatformのSmo
 作成します。失敗時はDeploymentを拒否します。Inkdrop Registryへの公開は、GitHub Release検証後に行う
 別の手動工程です。
 
-PerryはWindows ARM64向けCompilerを配布していません。そのためWindows ARM64 Jobでは、Windows 11 ARMの
-x64 Emulation上でHelperをBuildし、ARM64 Runner上で実行できることを確認してから
+PerryはWindows ARM64向けCompilerを配布していません。そのためWindows x64 RunnerでHelperをBuildし、
+その同一ArtifactをWindows 11 ARM Runnerへ渡して、x64 Emulation上で実行できることを確認してから
 `bin/win32-arm64`へ格納します。
 
 ## コマンド

@@ -151,9 +151,9 @@ rebuilding them, creating the version tag only at publication time. Reject the d
 test fails. Publishing to the Inkdrop Registry remains a separate manual step after the GitHub
 Release has been verified.
 
-Perry does not publish a Windows ARM64 compiler. The Windows ARM64 job therefore builds the x64
-helper under Windows 11 ARM emulation and verifies that the resulting executable starts on the ARM64
-runner before packaging it in `bin/win32-arm64`.
+Perry does not publish a Windows ARM64 compiler. The workflow therefore builds the x64 helper on a
+Windows x64 runner, transfers that exact artifact to a Windows 11 ARM runner, and verifies that it
+starts under x64 emulation before packaging it in `bin/win32-arm64`.
 
 ## Commands
 
