@@ -100,21 +100,28 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: x64
+            node_arch: x64
           - os: ubuntu-24.04-arm
             platform: linux
             arch: arm64
+            node_arch: arm64
           - os: windows-latest
             platform: win32
             arch: x64
+            node_arch: x64
           - os: windows-11-arm
             platform: win32
             arch: arm64
+            node_arch: x64
+            emulated: true
           - os: macos-15-intel
             platform: darwin
             arch: x64
+            node_arch: x64
           - os: macos-latest
             platform: darwin
             arch: arm64
+            node_arch: arm64
     steps:
       - name: Native helper build not required
         if: needs.changes.outputs.helper != 'true'
@@ -160,6 +167,7 @@ jobs:
         timeout-minutes: 2
         with:
           node-version: ${{ env.NODE_VERSION }}
+          architecture: ${{ matrix.node_arch }}
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - name: Install Linux native dependencies
@@ -174,3 +182,16 @@ jobs:
         if: needs.changes.outputs.helper == 'true'
         timeout-minutes: 30
         run: pnpm build:helper
+      - name: Stage Windows ARM64 compatibility helper
+        if: needs.changes.outputs.helper == 'true' && matrix.emulated == true
+        timeout-minutes: 2
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force packages/credential-helper/dist/win32-arm64 | Out-Null
+          Copy-Item packages/credential-helper/dist/win32-x64/credential-helper.exe `
+            packages/credential-helper/dist/win32-arm64/credential-helper.exe
+          $response = '{}' | & packages/credential-helper/dist/win32-arm64/credential-helper.exe
+          if ($response -notmatch '"kind":"Failure"') {
+            throw "The x64 compatibility helper did not execute on Windows ARM64"
+          }
+          $global:LASTEXITCODE = 0
