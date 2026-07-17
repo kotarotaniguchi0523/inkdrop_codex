@@ -79,12 +79,16 @@ jobs:
           - name: Run TypeScript checks
             timeout-minutes: 5
             run: pnpm check
-      - name: Run test, compatibility, and build checks
-        timeout-minutes: 10
-        run: >-
-          pnpm test &&
-          pnpm perry:check &&
-          pnpm --filter inkdrop-codex build
+      - parallel:
+          - name: Run tests
+            timeout-minutes: 10
+            run: pnpm test
+          - name: Run Perry compatibility checks
+            timeout-minutes: 10
+            run: pnpm perry:check
+          - name: Build plugin
+            timeout-minutes: 5
+            run: pnpm --filter inkdrop-codex build
   helper:
     name: Helper (${{ matrix.platform }}-${{ matrix.arch }})
     needs: changes
