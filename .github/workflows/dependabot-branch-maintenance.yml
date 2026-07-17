@@ -1,0 +1,31 @@
+name: Dependabot branch maintenance
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  rebase:
+    name: Rebase Dependabot branch
+    if: >-
+      github.repository == 'kotarotaniguchi0523/inkdrop_codex' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Update branch when behind main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          state=$(gh pr view "$PR_NUMBER" --json mergeStateStatus --jq .mergeStateStatus)
+          if [ "$state" = "BEHIND" ] || [ "$state" = "BLOCKED" ]; then
+            gh pr update-branch "$PR_NUMBER" --rebase
+          else
+            echo "No branch update required (merge state: $state)."
+          fi
