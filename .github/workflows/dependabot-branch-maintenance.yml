@@ -1,0 +1,35 @@
+name: Dependabot branch maintenance
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  rebase:
+    name: Rebase Dependabot branch
+    if: github.repository == 'kotarotaniguchi0523/inkdrop_codex'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Update branch when behind main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --author 'dependabot[bot]' \
+            --base main \
+            --json number,mergeStateStatus \
+            --jq '.[] | select(.mergeStateStatus == "BEHIND" or .mergeStateStatus == "BLOCKED") | .number' |
+          while read -r pr_number; do
+            [ -n "$pr_number" ] || continue
+            echo "Rebasing Dependabot PR #$pr_number"
+            gh pr update-branch "$pr_number" --rebase --repo "$GITHUB_REPOSITORY"
+          done
