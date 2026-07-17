@@ -141,9 +141,10 @@ Enable Development Mode in Inkdrop and reload it. See
 
 ## Continuous integration
 
-Pull requests run the complete quality gate, dependency review, CodeQL, and native credential-helper
-builds on Linux, Windows, and macOS without producing a release archive. Manually running the
-**Release** workflow from `main` builds one `inkdrop-codex-release-bundle` and then pauses at the
+Pull requests run the complete quality gate, dependency review, CodeQL, and native
+credential-helper builds for x64 and ARM64 on Linux, Windows, and macOS without producing a release
+archive. Manually running the **Release** workflow from `main` builds one
+`inkdrop-codex-release-bundle` and then pauses at the
 protected `inkdrop-production` environment. Download that artifact and complete the platform smoke
 tests before approving the environment. Approval attests and publishes those exact archives without
 rebuilding them, creating the version tag only at publication time. Reject the deployment if any

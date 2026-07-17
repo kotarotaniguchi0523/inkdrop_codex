@@ -85,7 +85,7 @@ jobs:
         run: pnpm quality:ci
 
   helper:
-    name: Release helper (${{ matrix.os }})
+    name: Release helper (${{ matrix.platform }}-${{ matrix.arch }})
     needs: preflight
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
@@ -93,9 +93,27 @@ jobs:
       PERRY_WORKSPACE_ROOT: ${{ github.workspace }}/.perry-source
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 6
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+          - os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+          - os: windows-latest
+            platform: win32
+            arch: x64
+          - os: windows-11-arm
+            platform: win32
+            arch: arm64
+          - os: macos-15-intel
+            platform: darwin
+            arch: x64
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -136,7 +154,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         timeout-minutes: 3
         with:
-          name: credential-helper-${{ runner.os }}-${{ runner.arch }}
+          name: credential-helper-${{ matrix.platform }}-${{ matrix.arch }}
           path: packages/credential-helper/dist/
           if-no-files-found: error
           compression-level: 0
@@ -180,9 +198,12 @@ jobs:
           HELPER_SOURCE: ${{ runner.temp }}/credential-helpers
         run: |
           test -f "$HELPER_SOURCE/linux-x64/credential-helper"
+          test -f "$HELPER_SOURCE/linux-arm64/credential-helper"
           test -f "$HELPER_SOURCE/win32-x64/credential-helper.exe"
+          test -f "$HELPER_SOURCE/win32-arm64/credential-helper.exe"
+          test -f "$HELPER_SOURCE/darwin-x64/credential-helper"
           test -f "$HELPER_SOURCE/darwin-arm64/credential-helper"
-          test "$(find "$HELPER_SOURCE" -type f \( -name credential-helper -o -name credential-helper.exe \) | wc -l)" -eq 3
+          test "$(find "$HELPER_SOURCE" -type f \( -name credential-helper -o -name credential-helper.exe \) | wc -l)" -eq 6
           mkdir -p packages/plugin/bin
           cp -R "$HELPER_SOURCE"/. packages/plugin/bin/
       - name: Restore Unix executable permissions
@@ -207,7 +228,10 @@ jobs:
           unzip -q "inkdrop-codex-${VERSION}.zip" -d "$RUNNER_TEMP/release-inspection"
           test "$(node -p "require('$RUNNER_TEMP/release-inspection/inkdrop-codex/package.json').version")" = "$VERSION"
           test -f "$RUNNER_TEMP/release-inspection/inkdrop-codex/bin/linux-x64/credential-helper"
+          test -f "$RUNNER_TEMP/release-inspection/inkdrop-codex/bin/linux-arm64/credential-helper"
           test -f "$RUNNER_TEMP/release-inspection/inkdrop-codex/bin/win32-x64/credential-helper.exe"
+          test -f "$RUNNER_TEMP/release-inspection/inkdrop-codex/bin/win32-arm64/credential-helper.exe"
+          test -f "$RUNNER_TEMP/release-inspection/inkdrop-codex/bin/darwin-x64/credential-helper"
           test -f "$RUNNER_TEMP/release-inspection/inkdrop-codex/bin/darwin-arm64/credential-helper"
       - name: Upload release bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

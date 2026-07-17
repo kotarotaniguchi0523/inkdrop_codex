@@ -86,7 +86,7 @@ jobs:
           pnpm perry:check &&
           pnpm --filter inkdrop-codex build
   helper:
-    name: Helper (${{ matrix.os }})
+    name: Helper (${{ matrix.platform }}-${{ matrix.arch }})
     needs: changes
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
@@ -94,9 +94,27 @@ jobs:
       PERRY_WORKSPACE_ROOT: ${{ github.workspace }}/.perry-source
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 6
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+          - os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+          - os: windows-latest
+            platform: win32
+            arch: x64
+          - os: windows-11-arm
+            platform: win32
+            arch: arm64
+          - os: macos-15-intel
+            platform: darwin
+            arch: x64
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
     steps:
       - name: Native helper build not required
         if: needs.changes.outputs.helper != 'true'
@@ -126,9 +144,9 @@ jobs:
         timeout-minutes: 5
         with:
           path: .perry-source/target
-          key: perry-target-${{ runner.os }}-${{ runner.arch }}-06137858-${{ github.sha }}
+          key: perry-target-${{ matrix.platform }}-${{ matrix.arch }}-06137858-${{ github.sha }}
           restore-keys: |
-            perry-target-${{ runner.os }}-${{ runner.arch }}-06137858-
+            perry-target-${{ matrix.platform }}-${{ matrix.arch }}-06137858-
       - name: Install pnpm
         if: needs.changes.outputs.helper == 'true'
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
