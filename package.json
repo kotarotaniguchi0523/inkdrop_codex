@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kotarotaniguchi0523/inkdrop_codex.git"
   },
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@11.15.1",
   "engines": {
     "node": ">=24.0.0"
   },

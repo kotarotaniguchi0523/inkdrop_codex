@@ -21,7 +21,17 @@ jobs:
         timeout-minutes: 2
         with:
           persist-credentials: false
+          fetch-depth: 2
+      - name: Classify changed files
+        id: changes
+        timeout-minutes: 1
+        run: node scripts/classify-ci-changes.mjs >> "$GITHUB_OUTPUT"
+      - name: Dependency review not required
+        if: steps.changes.outputs.dependencies != 'true'
+        timeout-minutes: 1
+        run: echo "No dependency manifests or lockfiles changed."
       - name: Reject vulnerable dependency changes
+        if: steps.changes.outputs.dependencies == 'true'
         uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
         timeout-minutes: 5
         with:

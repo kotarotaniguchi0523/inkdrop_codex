@@ -1,6 +1,7 @@
 /.github/CODEOWNERS @kotarotaniguchi0523
 /.github/workflows/ @kotarotaniguchi0523
 /.github/dependabot.yml @kotarotaniguchi0523
+/scripts/classify-ci-changes.mjs @kotarotaniguchi0523
 /packages/credential-helper/ @kotarotaniguchi0523
 /packages/plugin/scripts/package-release.mjs @kotarotaniguchi0523
 /pnpm-lock.yaml @kotarotaniguchi0523

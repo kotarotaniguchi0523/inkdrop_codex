@@ -14,7 +14,7 @@ concurrency:
 
 env:
   NODE_VERSION: 24.13.0
-  PNPM_VERSION: 10.14.0
+  PNPM_VERSION: 11.15.1
 
 jobs:
   preflight:
@@ -34,6 +34,19 @@ jobs:
           test "$GITHUB_REF" = "refs/heads/main"
           test "$GITHUB_ACTOR" = "$REPOSITORY_OWNER"
           test "$TRIGGERING_ACTOR" = "$REPOSITORY_OWNER"
+      - name: Require an owner-authored verified commit
+        timeout-minutes: 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          commit_identity=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA" \
+            --jq '[.author.login // "", (.commit.verification.verified | tostring), .commit.verification.reason] | @tsv')
+          IFS=$'\t' read -r commit_author signature_verified verification_reason <<< "$commit_identity"
+
+          test "$commit_author" = "$REPOSITORY_OWNER"
+          test "$signature_verified" = "true"
+          test "$verification_reason" = "valid"
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         timeout-minutes: 2
@@ -302,7 +315,7 @@ jobs:
           retention-days: 14
 
   release:
-    name: Publish approved release
+    name: Publish verified release
     needs: [preflight, bundle]
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -312,7 +325,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - name: Download the approved bundle from this workflow run
+      - name: Download the verified bundle from this workflow run
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         timeout-minutes: 3
         with:
