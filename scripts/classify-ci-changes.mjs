@@ -35,9 +35,7 @@ const git = (...args) => {
   return result.stdout;
 };
 
-const changedFiles = git("diff", "--name-only", "--diff-filter=ACMR", base, head, "--")
-  .split("\n")
-  .filter(Boolean);
+const changedFiles = git("diff", "--name-only", base, head, "--").split("\n").filter(Boolean);
 
 const result = {
   quality: false,
@@ -71,7 +69,8 @@ const manifests = changedFiles.filter(
   (file) => file === "package.json" || WORKSPACE_MANIFEST.test(file),
 );
 const lockfileChanged = changedFiles.includes("pnpm-lock.yaml");
-const isDocumentation = (file) => DOCUMENTATION_FILES.has(file) || file.startsWith("docs/");
+const isDocumentation = (file) =>
+  DOCUMENTATION_FILES.has(file) || file.startsWith("docs/") || file.endsWith(".md");
 const isCredentialPackage = (file) =>
   file.startsWith("packages/credential-contract/") ||
   file.startsWith("packages/credential-helper/");
