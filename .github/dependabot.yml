@@ -3,11 +3,16 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: daily
       time: "09:00"
       timezone: Asia/Tokyo
     open-pull-requests-limit: 5
+    rebase-strategy: auto
+    cooldown:
+      default-days: 3
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
     versioning-strategy: increase-if-necessary
     groups:
       development-dependencies:
@@ -17,8 +22,17 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: daily
       time: "09:30"
       timezone: Asia/Tokyo
     open-pull-requests-limit: 5
+    rebase-strategy: auto
+    cooldown:
+      default-days: 3
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    groups:
+      github-actions:
+        patterns:
+          - "*"
