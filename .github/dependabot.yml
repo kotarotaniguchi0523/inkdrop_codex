@@ -15,10 +15,24 @@ updates:
       semver-patch-days: 3
     versioning-strategy: increase-if-necessary
     groups:
+      MAJOR-development-dependencies:
+        dependency-type: development
+        update-types:
+          - major
+      MAJOR-production-dependencies:
+        dependency-type: production
+        update-types:
+          - major
       development-dependencies:
         dependency-type: development
+        update-types:
+          - minor
+          - patch
       production-dependencies:
         dependency-type: production
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -33,6 +47,14 @@ updates:
       semver-minor-days: 7
       semver-patch-days: 3
     groups:
+      MAJOR-github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - major
       github-actions:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch

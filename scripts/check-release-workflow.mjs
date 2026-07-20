@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 
 const normalizeLineEndings = (source) => source.replaceAll("\r\n", "\n");
 const ci = normalizeLineEndings(await readFile(".github/workflows/ci.yml", "utf8"));
@@ -18,7 +18,7 @@ const requirePolicy = (condition, message) => {
 const count = (source, pattern) => [...source.matchAll(pattern)].length;
 
 requirePolicy(!ci.includes("workflow_dispatch"), "normal CI must not build release artifacts");
-requirePolicy(!ci.includes("Publish approved release"), "publishing must stay isolated from CI");
+requirePolicy(!ci.includes("Publish verified release"), "publishing must stay isolated from CI");
 requirePolicy(
   release.includes("on:\n  workflow_dispatch:\n\npermissions:\n  contents: read"),
   "release must be manual and read-only by default",
@@ -28,7 +28,7 @@ requirePolicy(!release.includes("pull_request:"), "pull requests must not invoke
 requirePolicy(!release.includes("push:"), "pushes and tags must not invoke release jobs");
 requirePolicy(
   release.includes(releaseConcurrencyPolicy),
-  "a pending approval must not be cancelled or replaced by another run",
+  "a release run must not be cancelled or replaced by another run",
 );
 requirePolicy(
   release.includes('test "$GITHUB_REF" = "refs/heads/main"') &&
@@ -37,10 +37,17 @@ requirePolicy(
   "only an owner-triggered main build may reach the release boundary",
 );
 requirePolicy(
+  release.includes("Require an owner-authored verified commit") &&
+    release.includes('test "$commit_author" = "$REPOSITORY_OWNER"') &&
+    release.includes('test "$signature_verified" = "true"') &&
+    release.includes('test "$verification_reason" = "valid"'),
+  "release commits must be owner-authored with a valid verified signature",
+);
+requirePolicy(
   release.includes("environment: inkdrop-production") &&
     release.includes("needs: [preflight, bundle]") &&
     release.includes("contents: write\n      id-token: write\n      attestations: write"),
-  "write and signing permissions must exist only behind production approval",
+  "write and signing permissions must exist only after verified preflight and build jobs",
 );
 requirePolicy(
   count(release, /name: inkdrop-codex-release-bundle/gu) === 2,
@@ -61,12 +68,24 @@ requirePolicy(
   "published archives must receive a provenance attestation",
 );
 
-for (const [name, workflow] of [
-  ["CI", ci],
-  ["release", release],
-]) {
+const workflowFiles = (await readdir(".github/workflows"))
+  .filter((file) => file.endsWith(".yml") || file.endsWith(".yaml"))
+  .sort();
+const workflows = await Promise.all(
+  workflowFiles.map(async (file) => [
+    file,
+    normalizeLineEndings(await readFile(`.github/workflows/${file}`, "utf8")),
+  ]),
+);
+
+for (const [file, workflow] of workflows) {
+  const name = `.github/workflows/${file}`;
+  requirePolicy(
+    !workflow.includes("pull_request_target"),
+    `${name} must not use pull_request_target`,
+  );
+
   const uses = [...workflow.matchAll(/^\s*uses:\s*([^\s#]+).*$/gmu)].map((match) => match[1]);
-  requirePolicy(uses.length > 0, `${name} workflow must contain actions`);
   for (const action of uses) {
     requirePolicy(
       /@\p{ASCII_Hex_Digit}{40}$/u.test(action),

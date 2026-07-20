@@ -5,10 +5,15 @@ on:
     branches: [main]
   schedule:
     - cron: "17 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
+
+concurrency:
+  group: dependabot-branch-maintenance
+  cancel-in-progress: false
 
 jobs:
   rebase:
@@ -21,13 +26,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # BLOCKED also means "waiting for required checks". Rebasing that state
+          # would create an hourly CI loop, so only update genuinely stale branches.
           gh pr list \
             --repo "$GITHUB_REPOSITORY" \
             --state open \
             --author 'dependabot[bot]' \
             --base main \
+            --limit 100 \
             --json number,mergeStateStatus \
-            --jq '.[] | select(.mergeStateStatus == "BEHIND" or .mergeStateStatus == "BLOCKED") | .number' |
+            --jq '.[] | select(.mergeStateStatus == "BEHIND") | .number' |
           while read -r pr_number; do
             [ -n "$pr_number" ] || continue
             echo "Rebasing Dependabot PR #$pr_number"

@@ -141,15 +141,14 @@ Enable Development Mode in Inkdrop and reload it. See
 
 ## Continuous integration
 
-Pull requests run the complete quality gate, dependency review, CodeQL, and native
-credential-helper builds for x64 and ARM64 on Linux, Windows, and macOS without producing a release
-archive. Manually running the **Release** workflow from `main` builds one
-`inkdrop-codex-release-bundle` and then pauses at the
-protected `inkdrop-production` environment. Download that artifact and complete the platform smoke
-tests before approving the environment. Approval attests and publishes those exact archives without
-rebuilding them, creating the version tag only at publication time. Reject the deployment if any
-test fails. Publishing to the Inkdrop Registry remains a separate manual step after the GitHub
-Release has been verified.
+Pull requests first classify the changed files, then run only the relevant quality, dependency,
+CodeQL, and native credential-helper gates without producing a release archive. Before manually
+running the **Release** workflow from `main`, make sure its HEAD commit is authored by the repository
+owner and has a valid **Verified** signature on GitHub. The workflow rejects any other commit, builds
+one `inkdrop-codex-release-bundle`, and publishes those exact archives through the protected
+`inkdrop-production` environment without rebuilding or requiring a second environment approval. It
+creates the version tag only at publication time. Publishing to the Inkdrop Registry remains a
+separate manual step after the GitHub Release has been verified.
 
 Perry does not publish a Windows ARM64 compiler. The workflow therefore builds the x64 helper on a
 Windows x64 runner, transfers that exact artifact to a Windows 11 ARM runner, and verifies that it
